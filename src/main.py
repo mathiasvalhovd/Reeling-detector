@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import config
 from detector import PhoneDetector
 from gaze import GazeDetector
-from video_player import VideoPlayer
+from audio_player import AudioPlayer
 
 
 class ReelingDetector:
@@ -30,8 +30,8 @@ class ReelingDetector:
             pitch_threshold=config.HEAD_PITCH_THRESHOLD
         )
 
-        print("Initializing video player...")
-        self.video_player = VideoPlayer(config.VIDEO_PATH)
+        print("Initializing audio player...")
+        self.audio_player = AudioPlayer(config.AUDIO_PATH, loop=config.AUDIO_LOOP)
 
         self.last_trigger_time = 0
         self._running = False
@@ -80,15 +80,15 @@ class ReelingDetector:
                 # Determine if we should trigger
                 should_play = self.should_trigger(phone_detected, looking_down)
 
-                # Handle video playback
+                # Handle audio playback
                 current_time = time.time()
-                if should_play and not self.video_player.is_playing:
+                if should_play and not self.audio_player.is_playing:
                     if current_time - self.last_trigger_time > config.DETECTION_COOLDOWN:
-                        print("Phone + looking down detected! Playing video...")
-                        self.video_player.play()
-                elif not should_play and self.video_player.is_playing:
-                    print("Conditions no longer met. Stopping video...")
-                    self.video_player.stop()
+                        print("Phone + looking down detected! Playing audio...")
+                        self.audio_player.play()
+                elif not should_play and self.audio_player.is_playing:
+                    print("Conditions no longer met. Stopping audio...")
+                    self.audio_player.stop()
                     self.last_trigger_time = current_time
 
                 # Draw visualizations
@@ -127,7 +127,8 @@ class ReelingDetector:
 
         finally:
             self._running = False
-            self.video_player.stop()
+            self.audio_player.stop()
+            self.audio_player.cleanup()
             cap.release()
             cv2.destroyAllWindows()
             print("Detection stopped.")

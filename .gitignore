@@ -1,0 +1,26 @@
+# Virtual environment
+venv/
+.venv/
+reeling_model/
+
+# Audio/media assets
+assets/*.mp3
+assets/*.wav
+assets/*.ogg
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# YOLO model weights (downloaded automatically)
+*.pt
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store

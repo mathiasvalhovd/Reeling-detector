@@ -14,8 +14,9 @@ FRAME_HEIGHT = 480
 # YOLO model settings
 YOLO_MODEL = "yolov8n.pt"  # nano model for CPU performance
 
-# Video playback settings
-VIDEO_PATH = "assets/reeling.mp4"  # path to video to play
+# Audio playback settings
+AUDIO_PATH = "assets/reeling.mp3"  # path to audio file to play
+AUDIO_LOOP = True  # loop audio while conditions are met
 
 # Detection timing
 DETECTION_COOLDOWN = 0.5  # seconds before triggering again after stopping
