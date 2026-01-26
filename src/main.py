@@ -52,6 +52,9 @@ class ReelingDetector:
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, config.FRAME_WIDTH)
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, config.FRAME_HEIGHT)
 
+        # Try to zoom out / reset zoom to minimum
+        cap.set(cv2.CAP_PROP_ZOOM, 0)
+
         print("Detection started. Press 'q' to quit.")
         self._running = True
 
@@ -73,18 +76,22 @@ class ReelingDetector:
                 phone_detections = self.phone_detector.detect(frame)
                 phone_detected = len(phone_detections) > 0
 
+                # Pass phone position to gaze detector
+                phone_bbox = phone_detections[0].bbox if phone_detected else None
+                self.gaze_detector.set_phone_position(phone_bbox)
+
                 # Detect gaze
                 gaze_result = self.gaze_detector.detect(frame)
-                looking_down = gaze_result.looking_down if gaze_result else False
+                looking_at_phone = gaze_result.looking_at_phone if gaze_result else False
 
                 # Determine if we should trigger
-                should_play = self.should_trigger(phone_detected, looking_down)
+                should_play = self.should_trigger(phone_detected, looking_at_phone)
 
                 # Handle audio playback
                 current_time = time.time()
                 if should_play and not self.audio_player.is_playing:
                     if current_time - self.last_trigger_time > config.DETECTION_COOLDOWN:
-                        print("Phone + looking down detected! Playing audio...")
+                        print("Phone + eyes on phone detected! Playing audio...")
                         self.audio_player.play()
                 elif not should_play and self.audio_player.is_playing:
                     print("Conditions no longer met. Stopping audio...")
