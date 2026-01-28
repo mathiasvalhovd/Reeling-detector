@@ -1,8 +1,6 @@
 """Audio playback module using pygame."""
 
-import threading
 from pathlib import Path
-
 import pygame
 
 
@@ -23,6 +21,10 @@ class AudioPlayer:
 
     @property
     def is_playing(self) -> bool:
+        if self._initialized and self._playing:
+            # Check if music is still actually playing
+            if not pygame.mixer.music.get_busy():
+                self._playing = False
         return self._playing
 
     def play(self) -> bool:
@@ -60,3 +62,41 @@ class AudioPlayer:
         if self._initialized:
             pygame.mixer.quit()
             self._initialized = False
+
+
+class AlertPlayer:
+    """Plays one-shot alert sounds."""
+
+    _initialized = False
+
+    @classmethod
+    def _init_pygame(cls):
+        """Initialize pygame mixer on first use."""
+        if not cls._initialized:
+            pygame.mixer.init()
+            cls._initialized = True
+
+    @classmethod
+    def play_alert(cls, audio_path: str) -> bool:
+        """Play a one-shot alert sound. Returns False if file doesn't exist."""
+        path = Path(audio_path)
+        if not path.exists():
+            print(f"Warning: Alert file not found: {path}")
+            return False
+
+        cls._init_pygame()
+
+        try:
+            sound = pygame.mixer.Sound(str(path))
+            sound.play()
+            return True
+        except pygame.error as e:
+            print(f"Error playing alert: {e}")
+            return False
+
+    @classmethod
+    def cleanup(cls):
+        """Clean up pygame resources."""
+        if cls._initialized:
+            pygame.mixer.quit()
+            cls._initialized = False
